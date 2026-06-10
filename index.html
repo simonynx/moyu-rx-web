@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -15,55 +15,13 @@
       <div class="hero-content">
         <p class="eyebrow">摸鱼划水吧</p>
         <h1>今天玩什么</h1>
-        <p>按人数、心情和设备快速选，不用研究半天。</p>
+        <p>按人数、桌游和设备快速选，不用研究半天。</p>
       </div>
     </header>
 
     <main>
-      <section class="section prescription-section" id="scenes">
-        <div class="section-head">
-          <p class="eyebrow">先选场景</p>
-          <h2>今天想怎么玩？</h2>
-        </div>
 
-        <div class="mood-grid" id="moodGrid" aria-label="选择今天的玩法场景"></div>
-
-        <article class="result-card" aria-live="polite">
-          <div class="result-topline">
-            <span class="result-icon" id="resultIcon">🍵</span>
-            <div>
-              <p class="eyebrow">推荐方案</p>
-              <h3 id="resultTitle">安静回血</h3>
-            </div>
-          </div>
-
-          <div class="rx-list">
-            <div class="rx-row">
-              <span>适合位置</span>
-              <strong id="resultPlace">图书角 / 大厅沙发</strong>
-            </div>
-            <div class="rx-row">
-              <span>建议时长</span>
-              <strong id="resultTime">60-120分钟</strong>
-            </div>
-            <div class="rx-row">
-              <span>适合人数</span>
-              <strong id="resultPeople">1-2人</strong>
-            </div>
-          </div>
-
-          <div class="suggestion-block">
-            <h4>推荐玩法</h4>
-            <ul id="resultActions"></ul>
-          </div>
-
-          <div class="staff-note compact">
-            <span>照这个组合选就行，想换玩法可以继续看下面的按人数推荐和桌游教程。</span>
-          </div>
-        </article>
-      </section>
-
-      <section class="section" id="people">
+      <section class="section" id="people" data-view="people">
         <div class="section-head">
           <p class="eyebrow">按人数选</p>
           <h2>几个人来，玩什么？</h2>
@@ -83,31 +41,23 @@
           <div class="tag-line" id="peopleTags"></div>
           <div class="people-rec-list" id="peopleRecs"></div>
         </article>
-
-        <article class="tutorial-panel" id="tutorialPanel" hidden>
-          <div class="tutorial-panel-head">
-            <span class="boardgame-icon" id="tutorialIcon">💎</span>
-            <div>
-              <p class="eyebrow">桌游教程</p>
-              <h3 id="tutorialTitle">璀璨宝石</h3>
-            </div>
-          </div>
-          <p id="tutorialBestFor"></p>
-          <div class="boardgame-meta" id="tutorialMeta"></div>
-          <ol class="tutorial-list" id="tutorialSteps"></ol>
-        </article>
       </section>
 
-      <section class="section" id="boardgames">
+      <section class="section" id="boardgames" data-view="boardgames">
         <div class="section-head">
-          <p class="eyebrow">桌游推荐</p>
-          <h2>推荐和1分钟教程</h2>
+          <p class="eyebrow">店内桌游库</p>
+          <h2>桌游库</h2>
+        </div>
+
+        <div class="boardgame-toolbar">
+          <div class="boardgame-filters" id="boardgameFilters" aria-label="筛选桌游"></div>
+          <p class="boardgame-count" id="boardgameCount">0 款</p>
         </div>
 
         <div class="boardgame-list" id="boardgameList"></div>
       </section>
 
-      <section class="section" id="devices">
+      <section class="section" id="devices" data-view="devices">
         <div class="section-head">
           <p class="eyebrow">包间通用</p>
           <h2>设备帮助</h2>
@@ -123,11 +73,12 @@
             </div>
           </div>
           <ol class="step-list" id="deviceSteps"></ol>
+          <div class="device-extra" id="deviceExtra"></div>
           <div class="device-tip" id="deviceTip"></div>
         </article>
       </section>
 
-      <section class="section" id="recommend">
+      <section class="section" id="recommend" data-view="recommend">
         <div class="section-head">
           <p class="eyebrow">今日推荐</p>
           <h2>小说、桌游和游戏</h2>
@@ -136,7 +87,7 @@
         <div class="recommend-grid" id="recommendGrid"></div>
       </section>
 
-      <section class="section service-section" id="service">
+      <section class="section service-section" id="service" data-view="service">
         <div class="section-head">
           <p class="eyebrow">到店服务</p>
           <h2>怎么用这页推荐</h2>
@@ -145,7 +96,7 @@
         <div class="service-steps">
           <div class="service-step">
             <span>1</span>
-            <p>先看场景或人数，确定大方向。</p>
+            <p>先看人数，再看桌游或设备教程。</p>
           </div>
           <div class="service-step">
             <span>2</span>
@@ -164,12 +115,12 @@
       </section>
     </main>
 
-    <nav class="bottom-nav" aria-label="页面导航">
-      <a href="#scenes">场景</a>
-      <a href="#people">人数</a>
-      <a href="#boardgames">桌游</a>
-      <a href="#devices">设备</a>
-      <a href="#recommend">推荐</a>
+    <nav class="bottom-nav" id="viewNav" aria-label="页面切换">
+      <button type="button" data-view="people"><span aria-hidden="true">👥</span><span>人数</span></button>
+      <button type="button" data-view="boardgames"><span aria-hidden="true">🎲</span><span>桌游库</span></button>
+      <button type="button" data-view="devices"><span aria-hidden="true">🔧</span><span>设备</span></button>
+      <button type="button" data-view="recommend"><span aria-hidden="true">⭐</span><span>推荐</span></button>
+      <button type="button" data-view="service"><span aria-hidden="true">ℹ️</span><span>说明</span></button>
     </nav>
   </div>
 
@@ -177,3 +128,4 @@
   <script src="./app.js"></script>
 </body>
 </html>
+

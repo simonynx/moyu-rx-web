@@ -6,7 +6,7 @@
 
 - `index.html`：页面结构
 - `styles.css`：视觉样式
-- `app.js`：场景推荐、人数推荐、桌游教程和设备教程切换
+- `app.js`：人数推荐、桌游库和设备教程切换
 - `site-config.js`：后端 API、OSS 图片前缀等配置
 - `assets/store-hall.png`：大厅照片素材
 
@@ -14,11 +14,13 @@
 
 当前“今日小说 / 今日桌游 / 今日主机 / 几个人怎么玩 / 桌游教程”等文案在 `app.js` 顶部：
 
+- `boardgameFilters`
 - `peoplePlans`
 - `recommendations`
-- `moods`
 - `devices`
 - `boardGames`
+
+桌游库的筛选按钮在 `boardgameFilters`，内容卡片在 `boardGames`；后面新增桌游时，补一条数据并写好 `filters` 标签就会自动进对应筛选。
 
 直接改文字后重新上传即可，不需要构建。
 
@@ -60,20 +62,10 @@ window.MOYU_RX_CONFIG = {
 页面支持用查询参数直接打开某个结果：
 
 ```text
-/rx/?mood=quiet
-/rx/?mood=friends
+/rx/?people=duo
 /rx/?device=ps5
+/rx/?boardgame=exploding-kittens
 ```
-
-可用 `mood`：
-
-- `quiet`：安静回血
-- `laugh`：想笑一下
-- `easy`：不想动脑
-- `friends`：朋友小聚
-- `mystery`：推理一下
-- `release`：发泄一下
-- `birthday`：生日小局
 
 可用 `people`：
 
