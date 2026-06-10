@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f27a3d">
+  <title>今天玩什么 | 摸鱼划水吧</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="store-hero" id="top">
+      <img id="heroImage" src="./assets/store-hall.png" alt="摸鱼划水吧大厅">
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <p class="eyebrow">摸鱼划水吧</p>
+        <h1>今天玩什么</h1>
+        <p>按人数、心情和设备快速选，不用研究半天。</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="section prescription-section" id="scenes">
+        <div class="section-head">
+          <p class="eyebrow">先选场景</p>
+          <h2>今天想怎么玩？</h2>
+        </div>
+
+        <div class="mood-grid" id="moodGrid" aria-label="选择今天的玩法场景"></div>
+
+        <article class="result-card" aria-live="polite">
+          <div class="result-topline">
+            <span class="result-icon" id="resultIcon">🍵</span>
+            <div>
+              <p class="eyebrow">推荐方案</p>
+              <h3 id="resultTitle">安静回血</h3>
+            </div>
+          </div>
+
+          <div class="rx-list">
+            <div class="rx-row">
+              <span>适合位置</span>
+              <strong id="resultPlace">图书角 / 大厅沙发</strong>
+            </div>
+            <div class="rx-row">
+              <span>建议时长</span>
+              <strong id="resultTime">60-120分钟</strong>
+            </div>
+            <div class="rx-row">
+              <span>适合人数</span>
+              <strong id="resultPeople">1-2人</strong>
+            </div>
+          </div>
+
+          <div class="suggestion-block">
+            <h4>推荐玩法</h4>
+            <ul id="resultActions"></ul>
+          </div>
+
+          <div class="staff-note compact">
+            <span>照这个组合选就行，想换玩法可以继续看下面的按人数推荐和桌游教程。</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="section" id="people">
+        <div class="section-head">
+          <p class="eyebrow">按人数选</p>
+          <h2>几个人来，玩什么？</h2>
+        </div>
+
+        <div class="people-tabs" id="peopleTabs" aria-label="选择人数"></div>
+
+        <article class="people-result" id="peopleResult" aria-live="polite">
+          <div class="people-result-head">
+            <span class="people-icon" id="peopleIcon">👫</span>
+            <div>
+              <p class="eyebrow">人数推荐</p>
+              <h3 id="peopleTitle">2个人</h3>
+            </div>
+          </div>
+          <p id="peopleText"></p>
+          <div class="tag-line" id="peopleTags"></div>
+          <div class="people-rec-list" id="peopleRecs"></div>
+        </article>
+
+        <article class="tutorial-panel" id="tutorialPanel" hidden>
+          <div class="tutorial-panel-head">
+            <span class="boardgame-icon" id="tutorialIcon">💎</span>
+            <div>
+              <p class="eyebrow">桌游教程</p>
+              <h3 id="tutorialTitle">璀璨宝石</h3>
+            </div>
+          </div>
+          <p id="tutorialBestFor"></p>
+          <div class="boardgame-meta" id="tutorialMeta"></div>
+          <ol class="tutorial-list" id="tutorialSteps"></ol>
+        </article>
+      </section>
+
+      <section class="section" id="boardgames">
+        <div class="section-head">
+          <p class="eyebrow">桌游推荐</p>
+          <h2>推荐和1分钟教程</h2>
+        </div>
+
+        <div class="boardgame-list" id="boardgameList"></div>
+      </section>
+
+      <section class="section" id="devices">
+        <div class="section-head">
+          <p class="eyebrow">包间通用</p>
+          <h2>设备帮助</h2>
+        </div>
+
+        <div class="device-tabs" id="deviceTabs" aria-label="设备教程分类"></div>
+        <article class="device-panel">
+          <div class="device-panel-head">
+            <span class="device-mark" id="deviceIcon">⚡</span>
+            <div>
+              <p class="eyebrow" id="deviceSub">先试这三步</p>
+              <h3 id="deviceTitle">快速排查</h3>
+            </div>
+          </div>
+          <ol class="step-list" id="deviceSteps"></ol>
+          <div class="device-tip" id="deviceTip"></div>
+        </article>
+      </section>
+
+      <section class="section" id="recommend">
+        <div class="section-head">
+          <p class="eyebrow">今日推荐</p>
+          <h2>小说、桌游和游戏</h2>
+        </div>
+
+        <div class="recommend-grid" id="recommendGrid"></div>
+      </section>
+
+      <section class="section service-section" id="service">
+        <div class="section-head">
+          <p class="eyebrow">到店服务</p>
+          <h2>怎么用这页推荐</h2>
+        </div>
+
+        <div class="service-steps">
+          <div class="service-step">
+            <span>1</span>
+            <p>先看场景或人数，确定大方向。</p>
+          </div>
+          <div class="service-step">
+            <span>2</span>
+            <p>桌游看教程，设备不会用看设备帮助。</p>
+          </div>
+          <div class="service-step">
+            <span>3</span>
+            <p>买票、预约、充值和买单继续用小程序。</p>
+          </div>
+        </div>
+
+        <div class="quiet-card">
+          <h3>不知道怎么选？</h3>
+          <p>优先按人数选。1个人看书放空，2个人轻主机或短桌游，3-4个人包间朋友局，5人以上用大厅桌游位。</p>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="页面导航">
+      <a href="#scenes">场景</a>
+      <a href="#people">人数</a>
+      <a href="#boardgames">桌游</a>
+      <a href="#devices">设备</a>
+      <a href="#recommend">推荐</a>
+    </nav>
+  </div>
+
+  <script src="./site-config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
