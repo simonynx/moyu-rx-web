@@ -201,7 +201,7 @@ const peoplePlans = [
   }
 ];
 
-const boardGames = [
+const defaultBoardGames = [
   {
     id: "splendor-duel",
     icon: "💎",
@@ -553,6 +553,7 @@ const boardGames = [
     ]
   }
 ];
+let boardGames = defaultBoardGames.slice();
 
 const recommendations = [
   {
@@ -589,11 +590,15 @@ const recommendations = [
 
 const deviceTabs = document.querySelector("#deviceTabs");
 const peopleTabs = document.querySelector("#peopleTabs");
+const peopleResult = document.querySelector("#peopleResult");
+const peopleRecsEl = document.querySelector("#peopleRecs");
+const peopleRecActionsEl = document.querySelector("#peopleRecActions");
 const recommendGrid = document.querySelector("#recommendGrid");
 const boardgameFiltersEl = document.querySelector("#boardgameFilters");
 const boardgameCountEl = document.querySelector("#boardgameCount");
 const boardgameList = document.querySelector("#boardgameList");
 const viewNav = document.querySelector("#viewNav");
+const heroQuicknav = document.querySelector("#heroQuicknav");
 const viewSections = Array.from(document.querySelectorAll("main section[data-view]"));
 const siteConfig = Object.assign({
   apiBaseUrl: "",
@@ -601,7 +606,7 @@ const siteConfig = Object.assign({
   useBackendHomeImage: false,
   fallbackHeroImage: "./assets/store-hall.png"
 }, window.MOYU_RX_CONFIG || {});
-const viewOrder = ["people", "boardgames", "devices", "recommend", "service"];
+const viewOrder = ["people", "boardgames", "devices", "recommend"];
 const boardgameFilters = [
   { id: "all", icon: "📚", label: "全部" },
   { id: "2p", icon: "👫", label: "2人" },
@@ -615,8 +620,11 @@ const boardgameFilters = [
 ];
 let activeBoardgameFilter = "all";
 let activeBoardgameId = "";
+let activePeoplePlanId = "";
+let expandedPeoplePlanId = "";
 let boardgameDragState = null;
 let suppressBoardgameClick = false;
+const collapsedPeopleRecommendationLimit = 4;
 
 
 function getVisibleBoardGames() {
@@ -660,6 +668,14 @@ function setActiveView(id, options) {
     button.setAttribute("aria-selected", String(active));
   });
 
+  if (heroQuicknav) {
+    heroQuicknav.querySelectorAll("[data-view-jump]").forEach((button) => {
+      const active = button.dataset.viewJump === view;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  }
+
   if (!options || options.updateHash !== false) {
     history.replaceState(null, "", "#" + view);
   }
@@ -695,6 +711,32 @@ function renderPeoplePlans() {
     if (!button) return;
     selectPeoplePlan(button.dataset.people);
   });
+}
+
+function renderPeopleRecommendations(plan) {
+  const isExpanded = expandedPeoplePlanId === plan.id;
+  const visibleRecommendations = isExpanded
+    ? plan.recommendations
+    : plan.recommendations.slice(0, collapsedPeopleRecommendationLimit);
+  peopleRecsEl.innerHTML = visibleRecommendations.map((item) => {
+    const tutorialAttr = item.tutorialId ? ` data-tutorial="${item.tutorialId}" data-has-tutorial="true"` : "";
+    return `
+      <button class="people-rec-card" type="button"${tutorialAttr}>
+        <span class="people-rec-type" data-rec-type="${item.type}">${item.type}</span>
+        <div>
+          <strong>${item.name}</strong>
+          <p>${item.desc}</p>
+        </div>
+      </button>
+    `;
+  }).join("");
+
+  const hiddenCount = plan.recommendations.length - collapsedPeopleRecommendationLimit;
+  peopleRecActionsEl.innerHTML = hiddenCount > 0 ? `
+    <button class="people-rec-toggle" type="button" data-people-toggle="${isExpanded ? "collapse" : "expand"}">
+      ${isExpanded ? "收起到精选推荐" : `再看 ${hiddenCount} 条推荐`}
+    </button>
+  ` : "";
 }
 
 function renderRecommendations() {
@@ -821,34 +863,21 @@ boardgameList.addEventListener("click", (event) => {
 });
 
 function selectPeoplePlan(id) {
-  const plan = peoplePlans.find((item) => item.id === id) || peoplePlans[1];
+  const plan = peoplePlans.find((item) => item.id === id) || peoplePlans[1] || peoplePlans[0];
+  const changed = activePeoplePlanId !== plan.id;
+  activePeoplePlanId = plan.id;
+  if (changed) {
+    expandedPeoplePlanId = "";
+  }
   document.querySelector("#peopleIcon").textContent = plan.icon;
   document.querySelector("#peopleTitle").textContent = plan.title;
   document.querySelector("#peopleText").textContent = plan.text;
   document.querySelector("#peopleTags").innerHTML = plan.tags.map((tag) => `<span>${tag}</span>`).join("");
-  document.querySelector("#peopleRecs").innerHTML = plan.recommendations.map((item) => {
-    const attr = item.tutorialId ? ` data-tutorial="${item.tutorialId}"` : "";
-    return `
-      <button class="people-rec-card" type="button"${attr}>
-        <span class="people-rec-type">${item.type}</span>
-        <div>
-          <strong>${item.name}</strong>
-          <p>${item.desc}</p>
-        </div>
-      </button>
-    `;
-  }).join("");
+  renderPeopleRecommendations(plan);
 
   document.querySelectorAll("[data-people]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.people === plan.id);
   });
-
-  document.querySelector("#peopleRecs").onclick = (event) => {
-    const card = event.target.closest("[data-tutorial]");
-    if (!card) return;
-    setActiveView("boardgames");
-    selectBoardGame(card.dataset.tutorial, { scrollIntoView: true });
-  };
 }
 
 function selectBoardGame(id, options) {
@@ -888,25 +917,121 @@ function withOssPrefix(src) {
   return trimmed;
 }
 
-async function loadBackendHeroImage() {
-  if (!siteConfig.useBackendHomeImage || !siteConfig.apiBaseUrl || !window.fetch) return;
+function parseRemoteJsonConfig(rawValue, configKey) {
+  if (typeof rawValue !== "string") return null;
+  const trimmed = rawValue.trim();
+  if (!trimmed) return null;
+  try {
+    return JSON.parse(trimmed);
+  } catch (error) {
+    console.warn("[moyu-rx] " + configKey + " JSON 解析失败", error);
+    return undefined;
+  }
+}
+
+function toTextArray(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+}
+
+function normalizeBoardGameSteps(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    if (Array.isArray(item)) {
+      const title = String(item[0] || "").trim();
+      const text = String(item[1] || "").trim();
+      return title && text ? [title, text] : null;
+    }
+    if (item && typeof item === "object") {
+      const title = String(item.title || "").trim();
+      const text = String(item.text || item.desc || "").trim();
+      return title && text ? [title, text] : null;
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function normalizeBoardGameVideoLinks(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => {
+    if (!item || typeof item !== "object") return null;
+    const title = String(item.title || "").trim();
+    const url = String(item.url || "").trim();
+    return title && url ? { title, url } : null;
+  }).filter(Boolean);
+}
+
+function normalizeBoardGamesConfig(value) {
+  if (!Array.isArray(value)) return null;
+  const seenIds = new Set();
+  return value.map((item) => {
+    if (!item || typeof item !== "object") return null;
+    const id = String(item.id || "").trim();
+    const name = String(item.name || "").trim();
+    if (!id || !name || seenIds.has(id)) return null;
+    seenIds.add(id);
+    return {
+      id,
+      icon: String(item.icon || "🎲").trim() || "🎲",
+      name,
+      meta: toTextArray(item.meta),
+      filters: toTextArray(item.filters),
+      bestFor: String(item.bestFor || "").trim(),
+      videoLinks: normalizeBoardGameVideoLinks(item.videoLinks),
+      steps: normalizeBoardGameSteps(item.steps)
+    };
+  }).filter(Boolean);
+}
+
+function applyRemoteBoardGames(rawValue) {
+  let normalized = normalizeBoardGamesConfig(rawValue);
+  if (!normalized && typeof rawValue === "string") {
+    const parsed = parseRemoteJsonConfig(rawValue, "rx_boardgames_json");
+    if (parsed === undefined || parsed === null) return;
+    normalized = normalizeBoardGamesConfig(parsed);
+  }
+  if (!normalized || !normalized.length) {
+    return;
+  }
+  boardGames = normalized;
+  if (activeBoardgameId && !boardGames.some((item) => item.id === activeBoardgameId)) {
+    activeBoardgameId = "";
+  }
+  renderBoardGames();
+}
+
+function applyRemoteHeroImage(data) {
+  if (!siteConfig.useBackendHomeImage || !data || typeof data !== "object") return;
+  const image = [
+    data.home_page_image0,
+    data.home_page_image1,
+    data.home_page_image2,
+    data.home_page_image3
+  ].map(withOssPrefix).find(Boolean);
+  if (image) {
+    document.querySelector("#heroImage").src = image;
+  }
+}
+
+async function loadRemoteConfig() {
+  if (!siteConfig.apiBaseUrl || !window.fetch) return;
   try {
     const endpoint = siteConfig.apiBaseUrl.replace(/\/$/, "") + "/config/";
     const response = await fetch(endpoint, { method: "GET" });
     if (!response.ok) return;
     const payload = await response.json();
     const data = payload && payload.data ? payload.data : payload;
-    const image = [
-      data.home_page_image0,
-      data.home_page_image1,
-      data.home_page_image2,
-      data.home_page_image3
-    ].map(withOssPrefix).find(Boolean);
-    if (image) {
-      document.querySelector("#heroImage").src = image;
+    applyRemoteHeroImage(data);
+    applyRemoteBoardGames(data.rx_boardgames);
+    if (!Array.isArray(data.rx_boardgames) || !data.rx_boardgames.length) {
+      applyRemoteBoardGames(data.rx_boardgames_json);
     }
   } catch (error) {
-    document.querySelector("#heroImage").src = siteConfig.fallbackHeroImage;
+    if (siteConfig.useBackendHomeImage) {
+      document.querySelector("#heroImage").src = siteConfig.fallbackHeroImage;
+    }
   }
 }
 
@@ -953,6 +1078,32 @@ function initFromQuery() {
   return resolvedView;
 }
 
+if (heroQuicknav) {
+  heroQuicknav.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-view-jump]");
+    if (!button) return;
+    setActiveView(button.dataset.viewJump);
+  });
+}
+
+peopleResult.addEventListener("click", (event) => {
+  const toggle = event.target.closest("[data-people-toggle]");
+  if (toggle) {
+    if (!activePeoplePlanId) return;
+    expandedPeoplePlanId = expandedPeoplePlanId === activePeoplePlanId ? "" : activePeoplePlanId;
+    const plan = peoplePlans.find((item) => item.id === activePeoplePlanId);
+    if (plan) {
+      renderPeopleRecommendations(plan);
+    }
+    return;
+  }
+
+  const card = event.target.closest("[data-tutorial]");
+  if (!card) return;
+  setActiveView("boardgames");
+  selectBoardGame(card.dataset.tutorial, { scrollIntoView: true });
+});
+
 viewNav.addEventListener("click", (event) => {
   const button = event.target.closest("[data-view]");
   if (!button) return;
@@ -972,4 +1123,4 @@ renderRecommendations();
 renderBoardGameFilters();
 renderBoardGames();
 setActiveView(initFromQuery(), { scroll: false, updateHash: false });
-loadBackendHeroImage();
+loadRemoteConfig();
